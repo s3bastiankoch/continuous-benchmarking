@@ -1,0 +1,78 @@
+name: Example
+on:
+  push:
+
+jobs:
+  benchmark:
+    name: Run example
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        # https://stackoverflow.com/questions/60052236/git-diff-gives-me-a-fatal-bad-revision-head1
+        with:
+          fetch-depth: 5
+      # - uses: actions/setup-go@v4
+      #   with:
+      #     go-version: "stable"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: hashicorp/setup-terraform@v3
+      # Only for local windows testing necessary
+      # - name: fix terraform file permissions
+      #   run: find /tmp -name "terraform" -type f -exec chmod 755 {} +
+
+      - run: terraform init
+        working-directory: ./infra/lambda-firecracker
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Start lambda emulation
+        id: provision-infrastructure
+        working-directory: ./infra/lambda-firecracker
+        run: |
+          TF_VAR_gcp_project=empiris TF_VAR_gcp_ssh_private_key=$GCP_SSH_PRIVATE_KEY TF_VAR_gcp_ssh_public_key=$GCP_SSH_PUBLIC_KEY terraform apply -auto-approve
+          ip_address=$(terraform output -raw ip)
+          echo $ip_address
+          echo "IP_ADDRESS=$ip_address" >> "$GITHUB_OUTPUT"
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          GCP_SSH_PRIVATE_KEY: ${{ secrets.CLOUD_SSH_PRIVATE_KEY }}
+          GCP_SSH_PUBLIC_KEY: ${{ secrets.CLOUD_SSH_PUBLIC_KEY }}
+
+      - name: Run Benchmark
+        uses: ./
+        with:
+          config_path: empiris.yaml
+        env:
+          GITHUB_WORKFLOW_ID: test.yml
+          api_key: ${{ secrets.EMPIRIS_API_KEY }}
+          # influx_token: "PdomKtCYz_r7ym9yAcHMzxCA57lwyTkAWiwUbVk4sXePLU5eAckk9J-K6pygGWODRq3t_gFrcsGQNhmJ7Y9HNw=="
+          host: "http://${{ steps.provision-infrastructure.outputs.IP_ADDRESS }}"
+          service_account: ${{ secrets.GOOGLE_CREDENTIALS }}
+          ssh_private_key: ${{ secrets.CLOUD_SSH_PRIVATE_KEY }}
+          ssh_public_key: ${{ secrets.CLOUD_SSH_PUBLIC_KEY }}
+          github_token: ${{ secrets.GH_TOKEN }}
+
+      # - name: Run Analysis Script
+      #   uses: ADSP-EMPIRIS/analysis-action@main
+      #   with:
+      #     supabase_url: ${{ secrets.SUPABASE_URL }}
+      #     supabase_key: ${{ secrets.SUPABASE_KEY }}
+      #     threshold: 0.03
+      #     api_key: ${{ secrets.UNKEY_API_ID }}
+      #   env:
+      #     NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      #     SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_KEY }}
+      #     THRESHOLD: 0.03
+      #     UNKEY_API_ID: ${{ secrets.UNKEY_API_ID }}
+
+      - name: Destroy cloud infrastructure
+        # Make sure infrastructure is destroyed even in case of previous failures
+        if: always()
+        run: TF_VAR_gcp_project=empiris TF_VAR_gcp_ssh_private_key=$GCP_SSH_PRIVATE_KEY TF_VAR_gcp_ssh_public_key=$GCP_SSH_PUBLIC_KEY terraform destroy -auto-approve
+        working-directory: ./infra/lambda-firecracker
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          GCP_SSH_PRIVATE_KEY: ${{ secrets.CLOUD_SSH_PRIVATE_KEY }}
+          GCP_SSH_PUBLIC_KEY: ${{ secrets.CLOUD_SSH_PUBLIC_KEY }}

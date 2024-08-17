@@ -1,0 +1,67 @@
+# name: Influx Benchmark
+# application: influxdb
+
+name: FaaSDuet Benchmark
+application: faasduet
+
+# benchmark:
+#   tool: inch
+#   version: 2
+#   influx_token: "{{ $env.influx_token }}"
+#   host: "{{ $env.influx_host }}"
+#   database: test
+
+# benchmark:
+#   tool: tsbs
+#   database:
+#     type: victoriametrics
+#     user: admin
+#     password: "{{ $env.influx_token }}"
+#     host: "{{ $env.influx_host }}"
+#     name: test
+
+benchmark:
+  tool: artillery
+  config_path: ./loadtest.yml
+  depends_on:
+    - url: "{{ $env.host }}/health"
+  host: "{{ $env.host }}"
+  report:
+    - empiris_0_response_time
+    - empiris_1_response_time
+    - empiris_0_idling_queue
+    - empiris_1_idling_queue
+
+analysis:
+  - script: test.py
+
+platform:
+  on: gcp-vm
+  project: empiris
+  instance:
+    machine_type: e2-standard-2
+    copy:
+      - local: ./metrics.js
+        remote: ./metrics.js
+      - local: ./loadtest.yml
+        remote: ./loadtest.yml
+      # Adapter will automatically detect package.json and install dependencies
+      - local: ./package.loadtest.json
+        remote: ./package.json
+    download:
+      - remote: ./logs
+        local: ./logs
+  auth:
+    service_account: "{{ $env.service_account }}"
+    ssh:
+      private_key: "{{ $env.ssh_private_key }}"
+      public_key: "{{ $env.ssh_public_key }}"
+
+save_artifacts:
+  - name: Benchmark-Logs
+    path: ./logs/*.log
+
+visualization:
+  api_key: "{{ $env.api_key }}"
+
+github_token: "{{ $env.github_token }}"

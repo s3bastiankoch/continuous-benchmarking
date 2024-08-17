@@ -1,0 +1,15 @@
+config:
+  # target: "{{ $env.host }}"
+  target: http://localhost
+  processor: "./metrics.js"
+  phases:
+    - duration: 180
+      arrivalCount: 310
+      name: load phase
+
+scenarios:
+  - beforeRequest: "setBody"
+    afterResponse: "trackResponseTimeWithoutQueueTime"
+    flow:
+      - post:
+          url: "/2015-03-31/functions/function/invocations"

@@ -1,0 +1,20 @@
+{
+  "name": "typescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
+    "build:esm": "esbuild src/index.ts --bundle --minify --sourcemap --platform=node --format=esm --outfile=dist/index.mjs --external:@aws-sdk --external:@smithy --external:uuid"
+  },
+  "keywords": [],
+  "author": "Sebastian Koch",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.134",
+    "esbuild": "^0.20.1"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  }
+}

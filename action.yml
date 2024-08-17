@@ -1,0 +1,12 @@
+name: "EMPIRIS Benchmark"
+author: "EMPIRIS developers <https://github.com/ADSP-EMPIRIS>"
+description: "The EMPIRIS benchmarking action"
+
+inputs:
+  config_path:
+    description: "Path to the EMPIRIS config"
+    required: false
+
+runs:
+  using: "node16"
+  main: "dist/index.js"
