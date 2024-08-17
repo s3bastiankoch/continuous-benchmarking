@@ -1,0 +1,9 @@
+name: Typecript Microbenchmark
+application: micro-ts
+
+benchmark:
+  tool: tinybench
+  entrypoint: examples/micro-ts/index.js
+
+platform:
+  on: local

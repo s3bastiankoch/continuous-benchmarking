@@ -47,6 +47,9 @@ dependencies:
   ssh2:
     specifier: ^1.15.0
     version: 1.15.0
+  tinybench:
+    specifier: ^2.9.0
+    version: 2.9.0
   ts-graphviz:
     specifier: ^1.8.1
     version: 1.8.1
@@ -3740,6 +3743,10 @@ packages:
 
   /text-hex@1.0.0:
     resolution: {integrity: sha512-uuVGNWzgJ4yhRaNSiubPY7OjISw4sw4E5Uv0wbjp+OzcbmVU/rsT8ujgcXJhn9ypzsgr5vlzpPqP+MBBKcGvbg==}
+    dev: false
+
+  /tinybench@2.9.0:
+    resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
     dev: false
 
   /tmpl@1.0.5:

@@ -17,33 +17,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: hashicorp/setup-terraform@v3
+      # - uses: hashicorp/setup-terraform@v3
       # Only for local windows testing necessary
       # - name: fix terraform file permissions
       #   run: find /tmp -name "terraform" -type f -exec chmod 755 {} +
 
-      - run: terraform init
-        working-directory: ./infra/lambda-firecracker
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      # - run: terraform init
+      #   working-directory: ./infra/lambda-firecracker
+      #   env:
+      #     GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
 
-      - name: Start lambda emulation
-        id: provision-infrastructure
-        working-directory: ./infra/lambda-firecracker
-        run: |
-          TF_VAR_gcp_project=empiris TF_VAR_gcp_ssh_private_key=$GCP_SSH_PRIVATE_KEY TF_VAR_gcp_ssh_public_key=$GCP_SSH_PUBLIC_KEY terraform apply -auto-approve
-          ip_address=$(terraform output -raw ip)
-          echo $ip_address
-          echo "IP_ADDRESS=$ip_address" >> "$GITHUB_OUTPUT"
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          GCP_SSH_PRIVATE_KEY: ${{ secrets.CLOUD_SSH_PRIVATE_KEY }}
-          GCP_SSH_PUBLIC_KEY: ${{ secrets.CLOUD_SSH_PUBLIC_KEY }}
+      # - name: Start lambda emulation
+      #   id: provision-infrastructure
+      #   working-directory: ./infra/lambda-firecracker
+      #   run: |
+      #     TF_VAR_gcp_project=empiris TF_VAR_gcp_ssh_private_key=$GCP_SSH_PRIVATE_KEY TF_VAR_gcp_ssh_public_key=$GCP_SSH_PUBLIC_KEY terraform apply -auto-approve
+      #     ip_address=$(terraform output -raw ip)
+      #     echo $ip_address
+      #     echo "IP_ADDRESS=$ip_address" >> "$GITHUB_OUTPUT"
+      #   env:
+      #     GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      #     GCP_SSH_PRIVATE_KEY: ${{ secrets.CLOUD_SSH_PRIVATE_KEY }}
+      #     GCP_SSH_PUBLIC_KEY: ${{ secrets.CLOUD_SSH_PUBLIC_KEY }}
 
       - name: Run Benchmark
         uses: ./
         with:
-          config_path: empiris.yaml
+          config_path: empiris.micro-ts.yaml
         env:
           GITHUB_WORKFLOW_ID: test.yml
           api_key: ${{ secrets.EMPIRIS_API_KEY }}
@@ -67,12 +67,12 @@ jobs:
       #     THRESHOLD: 0.03
       #     UNKEY_API_ID: ${{ secrets.UNKEY_API_ID }}
 
-      - name: Destroy cloud infrastructure
-        # Make sure infrastructure is destroyed even in case of previous failures
-        if: always()
-        run: TF_VAR_gcp_project=empiris TF_VAR_gcp_ssh_private_key=$GCP_SSH_PRIVATE_KEY TF_VAR_gcp_ssh_public_key=$GCP_SSH_PUBLIC_KEY terraform destroy -auto-approve
-        working-directory: ./infra/lambda-firecracker
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          GCP_SSH_PRIVATE_KEY: ${{ secrets.CLOUD_SSH_PRIVATE_KEY }}
-          GCP_SSH_PUBLIC_KEY: ${{ secrets.CLOUD_SSH_PUBLIC_KEY }}
+      # - name: Destroy cloud infrastructure
+      #   # Make sure infrastructure is destroyed even in case of previous failures
+      #   if: always()
+      #   run: TF_VAR_gcp_project=empiris TF_VAR_gcp_ssh_private_key=$GCP_SSH_PRIVATE_KEY TF_VAR_gcp_ssh_public_key=$GCP_SSH_PUBLIC_KEY terraform destroy -auto-approve
+      #   working-directory: ./infra/lambda-firecracker
+      #   env:
+      #     GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      #     GCP_SSH_PRIVATE_KEY: ${{ secrets.CLOUD_SSH_PRIVATE_KEY }}
+      #     GCP_SSH_PUBLIC_KEY: ${{ secrets.CLOUD_SSH_PUBLIC_KEY }}

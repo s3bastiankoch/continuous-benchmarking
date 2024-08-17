@@ -2,6 +2,7 @@ import { inchAdapter, InchAdapter } from "./inch";
 import { tsbsAdapter, TSBSAdapter } from "./tsbs";
 import { goAdapter, GoAdapter } from "./go";
 import { artilleryAdapter, ArtilleryAdapter } from "./artillery";
+import { tinybenchAdapter, TinybenchAdapter } from "./tinybench";
 import { Config } from "../config";
 import { BenchmarkAdapter } from "../types";
 import { z } from "zod";
@@ -26,7 +27,12 @@ export type Adapter<T extends Config["benchmark"]["tool"]> = IfEquals<
       T,
       TSBSAdapter["tool"],
       TSBSAdapter,
-      IfEquals<T, ArtilleryAdapter["tool"], ArtilleryAdapter, NullAdapter>
+      IfEquals<
+        T,
+        ArtilleryAdapter["tool"],
+        ArtilleryAdapter,
+        IfEquals<T, TinybenchAdapter["tool"], TinybenchAdapter, NullAdapter>
+      >
     >
   >
 >;
@@ -36,4 +42,5 @@ export const adapters = [
   tsbsAdapter,
   goAdapter,
   artilleryAdapter,
+  tinybenchAdapter,
 ] as const;

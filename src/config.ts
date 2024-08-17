@@ -104,12 +104,15 @@ const configSchema = z.object({
     )
     .optional()
     .default([]),
-  save_artifacts: z.array(
-    z.object({
-      name: z.string(),
-      path: z.string(),
-    })
-  ),
+  save_artifacts: z
+    .array(
+      z.object({
+        name: z.string(),
+        path: z.string(),
+      })
+    )
+    .optional()
+    .default([]),
 
   benchmark: z.union([
     adapters[0].config.extend({

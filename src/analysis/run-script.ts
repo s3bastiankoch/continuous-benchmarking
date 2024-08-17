@@ -9,8 +9,6 @@ import { Metric } from "../types";
  */
 export async function runScript({
   path,
-  downloadedDataContents,
-  metrics,
 }: {
   path: string;
   downloadedDataContents: Record<string, string>;

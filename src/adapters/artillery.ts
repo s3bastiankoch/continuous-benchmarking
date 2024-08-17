@@ -20,6 +20,7 @@ export const artilleryAdapter = createAdapter({
     host: z.string(),
     // List of keys to report
     report: z.array(z.string()),
+    // duet_mode: z.boolean().optional().default(false),
     depends_on: z
       .array(
         z.object({
